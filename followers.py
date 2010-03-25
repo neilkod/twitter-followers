@@ -16,22 +16,21 @@ def getUserInfo(user):
   return userinfo
   
 
-#flom=client.GetUser(uid)
 
+def writeFile(uid):
 
-def main(uid):
-  i=0
   nextCursor = "-1"
-  uid='peterflom'
   file='%s_followers.txt' % (uid)
   fileHandle = open(file,'w')
-  print "start: nextCursor is %s" % (nextCursor)
+  
+  myuser = {}
+  myUser = getUserInfo(uid)
+  text="%s\t%s\t%s\t%f" % (myUser['screen_name'],myUser['statuses_count'],myUser['followers_count'],float(myUser['statuses_count'])/myUser['followers_count'])
+  fileHandle.write(text + '\n')
+
 
   while nextCursor <> "0": 
-    print "iteration 0 begin: nextCursor: %s" % (nextCursor)
     followers,nextCursor = get_followers(uid,nextCursor)
-    print nextCursor
-    i=i+1
 
     # write to a log
 
@@ -47,7 +46,7 @@ def main(uid):
   fileHandle.close()
 
 """  
-client = twitter.Api(username='neilkod2',password='demopassword')
+client = twitter.Api(username='neilkod2',password='')
 uid = 'peterflom'
 flom=client.GetUser(uid)
 myFriends = flom.GetFriendsCount()

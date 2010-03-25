@@ -15,30 +15,48 @@ def getUserInfo(user):
   userinfo=simplejson.load(urllib.urlopen(url))
   return userinfo
   
-
+def updateFile(fileHandle,user):
+  name = user['screen_name']
+  tweets = user['statuses_count']
+  followers = user['followers_count']
+  
+  if followers <> 0:
+    pct = float(tweets) / float(followers)
+  else:
+    pct = 0
+    
+  text="%s\t%s\t%s\t%f" % (name, tweets,followers,pct)
+  fileHandle.write(text + '\n')
+  
+ 
 
 def writeFile(uid):
 
-  nextCursor = "-1"
+  
   file='%s_followers.txt' % (uid)
   fileHandle = open(file,'w')
   
   myuser = {}
   myUser = getUserInfo(uid)
-  text="%s\t%s\t%s\t%f" % (myUser['screen_name'],myUser['statuses_count'],myUser['followers_count'],float(myUser['statuses_count'])/myUser['followers_count'])
-  fileHandle.write(text + '\n')
+  updateFile(fileHandle,myUser)
+  
 
-
+  nextCursor = "-1"
   while nextCursor <> "0": 
     followers,nextCursor = get_followers(uid,nextCursor)
 
     # write to a log
 
     for ff in followers:
+      
       name = ff['screen_name']
       tweets = ff['statuses_count']
       followers = ff['followers_count']
-      pct = float(tweets) / float(followers)
+      if followers <> 0:
+        pct = float(tweets) / float(followers)
+      else:
+        pct = 0
+        
       text="%s\t%s\t%s\t%f" % (name, tweets,followers,pct)
       fileHandle.write(text + '\n')
 

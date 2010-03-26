@@ -1,12 +1,24 @@
 #!/usr/bin/python
 import twitter,time,simplejson,urllib
 
-def get_followers(screenName,cursorPos='-1'):
+def getFollowers(screenName,cursorPos='-1'):
   """ uses twitter REST API to return a dictionary of followers"""
   url="http://api.twitter.com/1/statuses/followers/%s.json?cursor=%s" % (screenName,cursorPos)
   result=simplejson.load(urllib.urlopen(url))
   entries=result['users']
   return entries, result['next_cursor_str']
+  
+def getFriends(screenName,cursorPos='-1'):
+  """ uses twitter REST API to return a dictionary of followers"""
+  url="http://api.twitter.com/1/statuses/friends/%s.json?cursor=%s" % (screenName,cursorPos)
+  result=simplejson.load(urllib.urlopen(url))
+  try:
+    entries=result['users']
+  except:
+    entries=None
+  return entries, result['next_cursor_str']  
+  
+  
 
 
 def getUserInfo(user):
@@ -28,12 +40,45 @@ def updateFile(fileHandle,user):
   text="%s\t%s\t%s\t%f" % (name, tweets,followers,pct)
   fileHandle.write(text + '\n')
   
+def getAllFollowers(user):
+  allFollowers={}
+  nextCursor = "-1"
+  while nextCursor <> "0":
+    followers,nextCursor = getFollowers(user,nextCursor)
+    for follower in followers:
+      allFollowers[follower['screen_name']] = follower
  
+  return allFollowers
+  
+def getAllFriends(user):
+  allFriends={}
+  nextCursor = "-1"
+  while nextCursor <> "0":
+    friends,nextCursor = getFriends(user,nextCursor)
+    for friend in friends:
+      allFriends[friend['screen_name']] = friend 
+  return allFriends      
+      
+def getCelebrityFriends(user):
+  celebrityFriends={}
+  threshhold=1000000 
+  nextCursor = "-1"
+  while nextCursor <> "0":
+    friends,nextCursor = getFriends(user,nextCursor)
+    for friend in friends:
+      if friend['followers_count'] >= threshhold:
+        celebrityFriends[friend['screen_name']] = friend
+  return celebrityFriends        
+        
 
-def writeFile(uid):
+      
+  
+
+
+def writeFile(uid,type):
 
   
-  file='%s_followers.txt' % (uid)
+  file='%s_%s.txt' % (uid,type)
   fileHandle = open(file,'w')
   
   myuser = {}
@@ -43,8 +88,11 @@ def writeFile(uid):
 
   nextCursor = "-1"
   while nextCursor <> "0": 
-    followers,nextCursor = get_followers(uid,nextCursor)
-
+    if type=='followers':
+      followers,nextCursor = getFollowers(uid,nextCursor)
+    else:
+      followers,nextCursor = getFriends(uid,nextCursor)
+      
     # write to a log
 
     for ff in followers:
@@ -62,6 +110,7 @@ def writeFile(uid):
 
 
   fileHandle.close()
+  
 
 """  
 client = twitter.Api(username='neilkod2',password='')

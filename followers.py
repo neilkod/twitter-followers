@@ -28,11 +28,16 @@ def getUserInfo(user):
   return userinfo
   
 def updateFile(fileHandle,user):
+  """ given the user and a filename, write a few
+      fields to the file.  New fields and calculations can be added to the file
+      as necessary"""
   name = user['screen_name']
   tweets = user['statuses_count']
   followers = user['followers_count']
   
-  if followers <> 0:
+  """ as long as the user has >0 follower, determine their
+      tweets to followers ratio """
+  if followers > 0:
     pct = float(tweets) / float(followers)
   else:
     pct = 0
@@ -41,6 +46,7 @@ def updateFile(fileHandle,user):
   fileHandle.write(text + '\n')
   
 def getAllFollowers(user):
+  """ for a given user, return a dict of ALL of their followers"""
   allFollowers={}
   nextCursor = "-1"
   while nextCursor <> "0":
@@ -51,6 +57,7 @@ def getAllFollowers(user):
   return allFollowers
   
 def getAllFriends(user):
+  """ for a given user, return a dict of all of their friends"""
   allFriends={}
   nextCursor = "-1"
   while nextCursor <> "0":
@@ -60,6 +67,10 @@ def getAllFriends(user):
   return allFriends      
       
 def getCelebrityFriends(user):
+  """ rough attempt at identifying celebrities.  for the time being
+      lets say a celebrity is someone with at least 1M followers
+      I need to build a stoplist for users like @cnn, @breakingnews, etc"""
+      
   celebrityFriends={}
   threshhold=1000000 
   nextCursor = "-1"
@@ -111,30 +122,3 @@ def writeFile(uid,type):
 
   fileHandle.close()
   
-
-"""  
-client = twitter.Api(username='neilkod2',password='')
-uid = 'peterflom'
-flom=client.GetUser(uid)
-myFriends = flom.GetFriendsCount()
-myTweets = flom.GetStatusesCount()
-pct = float(myTweets)/float(myFriends)
-#pages = myFriends/100
-print "my screen name: %s" % (uid)
-print "my friend count: %s" % (myFriends)
-print "my tweet count: %s" % (myTweets)
-print "my tweet/follower ratio: %f" % pct
-print "user\ttweets\tfollowers\tpct"
-for pageNum in range(1,5):
-  print "pageNum is: %s " % (pageNum)
-  followers=client.GetFriends(uid,page=pageNum)
-  time.sleep(1.5)
-
-  for ff in followers:
-	  name = ff.GetScreenName()
-	  tweets = ff.GetStatusesCount()
-	  followers = ff.GetFriendsCount()
-	  pct = float(tweets) / float(followers)
-	  print "%s\t%s\t%s\t%f" % (name, tweets,followers,pct)
-
-"""
